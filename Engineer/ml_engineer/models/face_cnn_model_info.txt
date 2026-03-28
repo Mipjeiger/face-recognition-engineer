@@ -1,0 +1,6 @@
+Model: Sequential CNN
+Input shape: (128,)
+Output: Binary (me vs not_me)
+Training data: 80% of dataset
+Validation data: 20% of dataset
+Early stopping: patience=20 epochs
