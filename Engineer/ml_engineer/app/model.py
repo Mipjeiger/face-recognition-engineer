@@ -46,7 +46,7 @@ def load_models():
     else:
         print(f"[CNN] Model file not found at {MODEL_FILE_KERAS}")
 
-def is_read() -> dict:
+def is_ready() -> dict:
     return {
         "knn_loaded": _knn is not None,
         "cnn_loaded": _cnn is not None,
@@ -101,11 +101,11 @@ def knn_predict(encoding: np.ndarray) -> dict:
     
     dist, _ = _knn.kneighbors([encoding], n_neighbors=1)
     distance = float(dist[0][0])
-    identity = _knn.predict([encoding])[0] if distance < THRESHOLD else "unknown"
+    identity_knn = _knn.predict([encoding])[0] if distance < THRESHOLD else "unknown"
     confidence = float(_knn.predict_proba([encoding]).max())
 
     return {
-        "identity": identity,
+        "identity": identity_knn,
         "confidence": round(confidence, 4),
         "distance": round(distance, 4),
         "model_used": "knn"
@@ -115,27 +115,23 @@ def knn_predict(encoding: np.ndarray) -> dict:
 # CNN Prediction
 # ===================================
 
-def cnn_predict(face_crop: np.ndarray) -> dict:
+def cnn_predict(encoding: np.ndarray) -> dict:
     if _cnn is None:
         return {"error": "CNN model not loaded"}
     
-    x = face_crop.astype("float32") / 255.0
-    x = np.expand_dims(x, axis=0)  # (1, 128, 128, 3)
-    probs = _cnn.predict(x, verbose=0)[0] # (num_classes,)
+    x = encoding.astype("float32")
+    x = np.expand_dims(x, axis=0)
 
-    idx = int(np.argmax(probs))
-    confidence = float(probs[idx])
-    identity = _cnn_labels[idx] if _cnn_labels else str(idx)
-
-    if confidence < THRESHOLD:
-        identity = "unknown"
+    prob = _cnn.predict(x, verbose=0)[0][0] # Binary classification: prob of "me"
+    confidence = float(prob)
+    identity = "me" if confidence >= 0.5 else "not_me"
 
     return {
         "identity": identity,
         "confidence": round(confidence, 4),
-        "distance": None,
+        "distance": round(1 - confidence, 4),
         "model_used": "cnn"
-        }
+    }
 
 # ===================================
 # Ensemble: run both, weighted vote
@@ -143,7 +139,7 @@ def cnn_predict(face_crop: np.ndarray) -> dict:
 
 def predict_ensemble(encoding: np.ndarray, face_crop: np.ndarray) -> dict:
     knn_result = knn_predict(encoding=encoding)
-    cnn_result = cnn_predict(face_crop=face_crop)
+    cnn_result = cnn_predict(encoding=encoding)
 
     knn_ok = "error" not in knn_result
     cnn_ok = "error" not in cnn_result
@@ -192,7 +188,7 @@ def predict(image_bytes: bytes, mode: str = "ensemble") -> dict:
     if mode == "knn":
         result = knn_predict(encoding=encoding)
     elif mode == "cnn":
-        result = cnn_predict(face_crop=face_crop)
+        result = cnn_predict(encoding=encoding)
     else:
         result = predict_ensemble(encoding=encoding, face_crop=face_crop)
 
