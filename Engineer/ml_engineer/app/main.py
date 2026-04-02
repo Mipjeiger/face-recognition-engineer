@@ -5,7 +5,7 @@ from typing import Literal
 from app import model
 from app.schemas import PredictResponse, HealthResponse, RegisterRequest
 
-ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
+ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg", "image/avif"}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

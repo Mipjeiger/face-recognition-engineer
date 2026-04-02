@@ -101,8 +101,11 @@ def knn_predict(encoding: np.ndarray) -> dict:
     
     dist, _ = _knn.kneighbors([encoding], n_neighbors=1)
     distance = float(dist[0][0])
-    identity_knn = _knn.predict([encoding])[0] if distance < THRESHOLD else "unknown"
+    identity_knn = _knn.predict([encoding])[0]
     confidence = float(_knn.predict_proba([encoding]).max())
+
+    if distance > THRESHOLD:
+        identity_knn = "unknown"
 
     return {
         "identity": identity_knn,
