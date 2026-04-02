@@ -12,3 +12,7 @@
     ![alt text](database/images/C9BD48C6-2D88-4B46-A397-7AB16A2A50FF.png)
     - CNN neural network model prediction
     ![alt text](database/images/D8AFD6DC-2ED3-4B7B-9E6F-E314D443ACC6.png)
+    - Face recognition with photos label unknowon out of training set
+    ![alt text](C7E709E3-16FF-45B0-BA17-3EAF21CA1A13.png)
+    - Face recognition with photos label not me -> based on models
+    ![alt text](26E3308F-E7F7-4C71-90BF-F53E61C3E07F.png)
